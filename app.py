@@ -8,15 +8,14 @@ import os
 # PAGE CONFIGURATION
 # -------------------------------------------------------
 st.set_page_config(
-    page_title="RideWise | Bike Prediction",
-    page_icon="🚴",
-    layout="centered"
+    page_title="RideWise | Bike Prediction", page_icon="🚴", layout="centered"
 )
 
 # -------------------------------------------------------
 # CUSTOM CSS & COLOR THEME
 # -------------------------------------------------------
-st.markdown("""
+st.markdown(
+    """
 <style>
 
 /* ------------------ GLOBAL SPACING ------------------ */
@@ -86,7 +85,9 @@ st.markdown("""
 }
 
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 
 # -------------------------------------------------------
@@ -95,12 +96,17 @@ st.markdown("""
 @st.cache_resource
 def load_resources():
     try:
-        model = joblib.load(r"/Users/harshita/vs_code/Infosys_springboard/RideWise-Predicting-Bike-sharing-Demand/Saved_model_files/gradient_boost.pkl")
-        feature_names = joblib.load(r"/Users/harshita/vs_code/Infosys_springboard/RideWise-Predicting-Bike-sharing-Demand/feature_names.pkl")
+        model = joblib.load(
+            r"/Users/harshita/vs_code/Infosys_springboard/RideWise-Predicting-Bike-sharing-Demand/Saved_model_files/gradient_boost.pkl"
+        )
+        feature_names = joblib.load(
+            r"/Users/harshita/vs_code/Infosys_springboard/RideWise-Predicting-Bike-sharing-Demand/feature_names.pkl"
+        )
         return model, feature_names
     except FileNotFoundError as e:
         st.error(f"⚠️ Error loading files: {e}")
         st.stop()
+
 
 model, feature_names = load_resources()
 
@@ -110,13 +116,16 @@ model, feature_names = load_resources()
 # Layout: Use a narrow center column to keep the logo tight and centered
 c1, c2, c3 = st.columns([3, 4, 3])
 
-#with c2:
-    # A vibrant, modern 3D-style cyclist illustration
-    # st.image("https://cdn-icons-png.flaticon.com/512/2972/2972185.png", width=160)
+# with c2:
+# A vibrant, modern 3D-style cyclist illustration
+# st.image("https://cdn-icons-png.flaticon.com/512/2972/2972185.png", width=160)
 
 # Centered Headings with enhanced typography
 st.markdown('<h1 class="title-text"> RideWise</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle-text">Urban Bike Mobility Forecaster</p>', unsafe_allow_html=True)
+st.markdown(
+    '<p class="subtitle-text">Urban Bike Mobility Forecaster</p>',
+    unsafe_allow_html=True,
+)
 
 # -------------------------------------------------------
 # INPUT CARDS
@@ -124,28 +133,44 @@ st.markdown('<p class="subtitle-text">Urban Bike Mobility Forecaster</p>', unsaf
 
 # --- CARD 1: TIME SETTINGS ---
 with st.container():
-    st.markdown('<div class="section-header">📅 Date & Schedule</div>', unsafe_allow_html=True)
-    
+    st.markdown(
+        '<div class="section-header">📅 Date & Schedule</div>', unsafe_allow_html=True
+    )
+
     c1, c2, c3 = st.columns(3)
     with c1:
-        yr = st.selectbox("Year", [2011, 2012], help="Historical data")
+
         season = st.selectbox("Season", ["Spring", "Summer", "Fall", "Winter"])
-    
+        weekday = st.selectbox(
+            "Day",
+            options=[0, 1, 2, 3, 4, 5, 6],
+            format_func=lambda x: [
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+            ][x],
+        )
+
     with c2:
         mnth = st.number_input("Month (1-12)", 1, 12, 7)
-        weekday = st.selectbox("Day", options=[0,1,2,3,4,5,6], 
-                            format_func=lambda x: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][x])
-    
+        holiday = st.selectbox("Is it a Holiday?", ["Yes", "No"], index=1)
+
     with c3:
         workingday = st.selectbox("Is it a Working Day?", ["Yes", "No"])
-        holiday = st.selectbox("Is it a Holiday?", ["Yes", "No"], index=1)
+
 
 # --- CARD 2: WEATHER SETTINGS ---
 with st.container():
-    st.markdown('<div class="section-header">🌤️ Weather Conditions</div>', unsafe_allow_html=True)
-    
+    st.markdown(
+        '<div class="section-header">🌤️ Weather Conditions</div>', unsafe_allow_html=True
+    )
+
     weathersit = st.selectbox("General Outlook", ["Clear", "Mist", "Snow/Rain"])
-    st.write("") 
+    st.write("")
 
     # Interactive Sliders
     temp_input = st.slider("🌡️ Temperature (°C)", -10.0, 40.0, 20.0, 0.5)
@@ -158,12 +183,12 @@ with st.container():
 
 st.write("")
 if st.button("PREDICT DEMAND"):
-    
+
     # 1. Processing Logic
-    season_map = {"Spring":1, "Summer":2, "Fall":3, "Winter":4}
+    season_map = {"Spring": 1, "Summer": 2, "Fall": 3, "Winter": 4}
     season_val = season_map[season]
-    
-    yr_val = 1 if yr == 2012 else 0
+
+    yr_val = 1
     working_val = 1 if workingday == "Yes" else 0
     holiday_val = 1 if holiday == "Yes" else 0
     weekend_val = 1 if weekday in [0, 6] else 0
@@ -205,14 +230,14 @@ if st.button("PREDICT DEMAND"):
     # 2. Prediction
     prediction = model.predict(input_df)[0]
     final_pred = int(prediction)
-    
+
     # 3. Display Results
     st.write("---")
     st.success(f"### 🚴 Predicted Rentals: **{final_pred}**")
 
     # 4. Generate Report
     reason_html = ""
-    
+
     if temp_input < 5:
         reason_html += "❄️ <b>Cold:</b> Low temps are reducing demand.<br>"
     elif temp_input > 30:
@@ -222,7 +247,7 @@ if st.button("PREDICT DEMAND"):
 
     if hum_input > 80:
         reason_html += "💧 <b>Humid:</b> High humidity is discouraging riders.<br>"
-    
+
     if weathersit == "Snow/Rain":
         reason_html += "🌧️ <b>Weather:</b> Rain/Snow is a major deterrent.<br>"
     elif weathersit == "Mist":
@@ -231,11 +256,14 @@ if st.button("PREDICT DEMAND"):
         reason_html += "☀️ <b>Clear:</b> Clear skies are boosting demand.<br>"
 
     # UPDATED INSIGHT REPORT with DARK FONTS
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div style="background-color: white; padding: 25px; border-radius: 12px; border-left: 6px solid #330867; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
         <h3 style="color: #000000; margin-top:0; font-weight: 700;">📊 Insight Report</h3>
         <div style="color: #222222; font-size: 16px; line-height: 1.8; font-weight: 500;">
             {reason_html}
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
