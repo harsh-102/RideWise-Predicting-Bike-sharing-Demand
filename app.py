@@ -96,12 +96,8 @@ st.markdown(
 @st.cache_resource
 def load_resources():
     try:
-        model = joblib.load(
-            r"/Users/harshita/vs_code/Infosys_springboard/RideWise-Predicting-Bike-sharing-Demand/Saved_model_files/gradient_boost.pkl"
-        )
-        feature_names = joblib.load(
-            r"/Users/harshita/vs_code/Infosys_springboard/RideWise-Predicting-Bike-sharing-Demand/feature_names.pkl"
-        )
+        model = joblib.load(r"Saved_model_files/gradient_boost.pkl")
+        feature_names = joblib.load(r"feature_names.pkl")
         return model, feature_names
     except FileNotFoundError as e:
         st.error(f"⚠️ Error loading files: {e}")
